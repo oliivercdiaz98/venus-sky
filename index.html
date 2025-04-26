@@ -1,0 +1,247 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Venus, mi chispa en la noche</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <!-- Sección inicial -->
+        <section id="intro" class="active">
+            <h1>Para Venus, mi chispa en la noche</h1>
+            <p>Este es nuestro cielo, un lugar donde las estrellas guardan lo que siento por ti. Toca, escucha y déjate llevar por este viaje que es solo para ti.</p>
+            <button class="button" id="start-button">Comenzar</button>
+        </section>
+        
+        <!-- Interacción 1: Dibujar un camino estelar -->
+        <section id="star-path">
+            <h2>Nuestro camino estelar</h2>
+            <p>Traza el camino que recorrimos juntos conectando estas estrellas (3 puntos).</p>
+            <div id="star-path-canvas"></div>
+            <p id="star-path-hint">Toca las estrellas para conectarlas.</p>
+        </section>
+        
+        <!-- Revelación 1 -->
+        <section id="reveal-1">
+            <h2>Un cielo que nos unió</h2>
+            <div class="typewriter" id="text-1"></div>
+            <button class="button" id="next-1">Continuar</button>
+        </section>
+        
+        <!-- Interacción 2: Liberar una estrella atrapada -->
+        <section id="free-star">
+            <h2>Libera nuestra luz</h2>
+            <p>El amor verdadero no encierra. Toca las jaulas para liberar las estrellas (3 jaulas).</p>
+            <div id="free-star-canvas" class="star-canvas"></div>
+        </section>
+        
+        <!-- Revelación 2 -->
+        <section id="reveal-2">
+            <h2>Un eco en mi corazón</h2>
+            <div class="typewriter" id="text-2"></div>
+            <button class="button" id="next-2">Continuar</button>
+        </section>
+        
+        <!-- Interacción 3: Iluminar una nebulosa -->
+        <section id="nebula-light">
+            <h2>Ilumina nuestra nebulosa</h2>
+            <p>Toca las partes de esta nebulosa para darle luz (3 partes).</p>
+            <div id="nebula-canvas" class="star-canvas"></div>
+        </section>
+        
+        <!-- Revelación 3 -->
+        <section id="reveal-3">
+            <h2>Una luz que no se apaga</h2>
+            <div class="typewriter" id="text-3"></div>
+            <button class="button" id="next-3">Continuar</button>
+        </section>
+        
+        <!-- Interacción 4: Romper cadenas estelares -->
+        <section id="break-chains">
+            <h2>Rompe las cadenas</h2>
+            <p>El amor no debe atar. Toca las cadenas para liberarlas (3 cadenas).</p>
+            <div id="chains-canvas" class="star-canvas"></div>
+        </section>
+        
+        <!-- Revelación 4 -->
+        <section id="reveal-4">
+            <h2>Un amor que libera</h2>
+            <div class="typewriter" id="text-4"></div>
+            <button class="button" id="next-4">Continuar</button>
+        </section>
+        
+        <!-- Interacción 5: Crear una constelación de recuerdos -->
+        <section id="memory-constellation">
+            <h2>Nuestra constelación de recuerdos</h2>
+            <p>Toca estos recuerdos para formar nuestra constelación (3 recuerdos).</p>
+            <div id="memory-canvas" class="star-canvas"></div>
+        </section>
+        
+        <!-- Revelación 5 -->
+        <section id="reveal-5">
+            <h2>Un amor sin cadenas</h2>
+            <div class="typewriter" id="text-5"></div>
+            <button class="button" id="next-5">Continuar</button>
+        </section>
+        
+        <!-- Interacción 6: Crear un cometa de deseos -->
+        <section id="comet-wish">
+            <h2>Un cometa de deseos</h2>
+            <p>Escribe un deseo para nuestro cielo y lánzalo como un cometa.</p>
+            <div class="wish-input-container">
+                <input type="text" id="wish-input" placeholder="Escribe tu deseo aquí..." maxlength="100">
+                <button class="button" id="launch-comet">Lanzar cometa</button>
+            </div>
+            <div id="comet-animation" class="comet-container"></div>
+        </section>
+        
+        <!-- Revelación 6 -->
+        <section id="reveal-6">
+            <h2>Un cielo para nuestras promesas</h2>
+            <div class="typewriter" id="text-6"></div>
+            <button class="button" id="next-6">Continuar</button>
+        </section>
+        
+        <!-- Interacción 7: Pintar el cielo con promesas -->
+        <section id="paint-sky">
+            <h2>Pintemos nuestro cielo</h2>
+            <p>Toca estas promesas para pintar nuestro cielo con ellas.</p>
+            <div id="paint-sky-box">
+                <div id="paint-sky-canvas" class="star-canvas"></div>
+            </div>
+        </section>
+        
+        <!-- Revelación 7 -->
+        <section id="reveal-7">
+            <h2>Un respiro, no un adiós</h2>
+            <div class="typewriter" id="text-7"></div>
+            <button class="button" id="next-7">Continuar</button>
+        </section>
+        
+        <!-- Sección: Foto 1 en Popup -->
+        <section id="photo-memory">
+            <h2>Un momento nuestro</h2>
+            <p>Recuerda este instante que compartimos, lleno de risas y luces.</p>
+            <button class="button" id="show-photo">Ver nuestra foto</button>
+            <div id="photo-popup" class="popup">
+                <div class="popup-content">
+                    <span class="close-popup">×</span>
+                    <img src="https://i.ibb.co/LX7v7xjS/photo-jpg.jpg" alt="Nuestra foto juntos">
+                    <p>Este momento siempre brillará en mi corazón.</p>
+                </div>
+            </div>
+            <button class="button" id="next-photo">Continuar</button>
+        </section>
+        
+        <!-- Sección: Notas Manuscritas -->
+        <section id="memory-notes">
+            <h2>Nuestras palabras eternas</h2>
+            <p>Estas cartas guardan nuestros sentimientos, escritos desde el corazón. Toca cada una para leerlas mejor.</p>
+            <div class="notes-container">
+                <div class="note-wrapper">
+                    <img src="https://i.ibb.co/35WxVkgw/note2-jpg.jpg" alt="Nota 2" class="memory-note" data-note-id="note-2">
+                </div>
+                <div class="note-wrapper">
+                    <img src="https://i.ibb.co/h09R1Pn/note3-jpg.jpg" alt="Nota 3" class="memory-note" data-note-id="note-3">
+                </div>
+                <div class="note-wrapper">
+                    <img src="https://i.ibb.co/b59PKjR5/note4-jpg.jpg" alt="Nota 4" class="memory-note" data-note-id="note-4">
+                </div>
+                <div class="note-wrapper">
+                    <img src="https://i.ibb.co/vvwPd4Ld/uno-jpg.jpg" alt="Nota 5" class="memory-note" data-note-id="note-5">
+                </div>
+            </div>
+            <!-- Popups para las notas -->
+            <div id="note-popup-note-2" class="popup note-popup">
+                <div class="popup-content">
+                    <span class="close-popup">×</span>
+                    <img src="https://i.ibb.co/35WxVkgw/note2-jpg.jpg" alt="Nota 2 Ampliada">
+                </div>
+            </div>
+            <div id="note-popup-note-3" class="popup note-popup">
+                <div class="popup-content">
+                    <span class="close-popup">×</span>
+                    <img src="https://i.ibb.co/h09R1Pn/note3-jpg.jpg" alt="Nota 3 Ampliada">
+                </div>
+            </div>
+            <div id="note-popup-note-4" class="popup note-popup">
+                <div class="popup-content">
+                    <span class="close-popup">×</span>
+                    <img src="https://i.ibb.co/b59PKjR5/note4-jpg.jpg" alt="Nota 4 Ampliada">
+                </div>
+            </div>
+            <div id="note-popup-note-5" class="popup note-popup">
+                <div class="popup-content">
+                    <span class="close-popup">×</span>
+                    <img src="https://i.ibb.co/vvwPd4Ld/uno-jpg.jpg" alt="Nota 5 Ampliada">
+                </div>
+            </div>
+            <button class="button" id="next-notes">Continuar</button>
+        </section>
+        
+        <!-- Revelación Final -->
+        <section id="final">
+            <h2>Para ti, mi Venus</h2>
+            <p>Venus, cada estrella de este cielo lleva un pedazo de nuestro amor. Mi corazón late por un nuevo amanecer juntos, pero más que nada quiero que tu alma brille libre y feliz. Escucha tu corazón y elige lo que te susurra.</p>
+            <div id="choice-container" class="choice-container visible">
+                <button class="button hope-button">Vuela conmigo🕊</button>
+                <button class="button closure-button">Te dejo volar sola, estrella 🩷 </button>
+            </div>
+            <p id="final-message" class="final-message"></p>
+            <p class="signature">-De tu chichilla peluda, que siempre llevará tu luz en su alma.</p>
+        </section>
+    </div>
+    
+    <button id="music-control">🎵</button>
+    
+    <audio id="background-music" loop>
+        <source src="Venus.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script src="script.js"></script>
+</body>
+</html>
